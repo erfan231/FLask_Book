@@ -1,8 +1,8 @@
 import requests
 import bs4
 
-Book_titles = []
-Book_prices = []
+Book_titles = set()
+Book_prices = set()
 
 
 def main():
@@ -19,13 +19,16 @@ def main():
                 book_price = book.select(".price_color")
 
                 for x in book_price:
-                    Book_prices.append(x.text)
+                    Book_prices.add(x.text)
             # in this case the book has 2 <a> tag one for the image/link and the scond one([1]) contains the 'title' tag in it
             # so we search the <a> tag and grab the title from it
-                Book_titles.append(book_title)
+                Book_titles.add(book_title)
+
+"""
 if __name__ == "__main__":
     main()
-    num = -1
+    print(Book_titles)
+    print(len(Book_titles))
 
     def a(number):
         global num
@@ -33,7 +36,9 @@ if __name__ == "__main__":
         return Book_titles[number]
 
 
+else:
+    pass:
+    main()
+    """
 
-    while num < len(Book_titles):
-        print(num)
-
+main()
