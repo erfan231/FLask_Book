@@ -1,109 +1,82 @@
 from flask import Flask, render_template
-import request
 import sqlite3
-import requests
-import bs4
+import request
 
-conn = sqlite3.connect("book_db.db")
-cursor = conn.cursor()
+class Books:
+    def __init__(self):
+        conn = sqlite3.connect("book.db")
+        cursor = conn.cursor()
+        self.conn = conn
+        self.cursor = cursor
+        self.Book_titles = request.Book_titles
+        self.Book_price = request.Book_prices
+    
+    def create_table(self):
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS books_new(book_id INTEGER PRIMARY KEY, book_name TEXT, book_price TEXT)")
+        self.conn.commit()
 
+    def insert_data(self):
+        self.cursor.execute("SELECT * FROM books")
+        value = self.cursor.fetchall()
+        num = 0
+        if len(value) == 0 or len(value) < 1:
+            for price in self.Book_price:
+                self.cursor.execute("INSERT INTO books_new(book_price) VALUES (?)", (str(price),))
+        for book in self.Book_titles:
+            self.cursor.execute("INSERT INTO books_new(book_name) VALUES (?)", (book,))
+            self.conn.commit()
+        else:
+            print("Data already exists")
 
-cursor.execute("CREATE TABLE IF NOT EXISTS books(book_name TEXT price_of_book TEXT)")
-conn.commit()
+    def show_values(self):
+        self.cursor.execute("SELECT * FROM books")
+        value = self.cursor.fetchall()
+        #if you want to see the values one by one
+        
+        for book in value:
+            print(book)
+        
 
+    def query_database(self,book_to_look_for):
+        self.cursor.execute("SELECT * FROM books WHERE book_name == {book_to_look_for}")
+        data = self.cursor.fetchall()
+        for x in data:
+            print(x)
+        self.conn.commit()
 
-def inserting_data(conn):
+    def picky_query(self,search_for):
+        self.cursor.execute("SELECT book_name FROM books WHERE book_id == {search_for}")
+        data = self.cursor.fetchall()
+        self.conn.commit()
 
-    Book_titles = set()
-
-    for n in range(1, 51):  # pages(1 to 50)
-        website_url = "http://books.toscrape.com/catalogue/page-{}.html"
-        website_request = requests.get(website_url.format(n))
-
-        soup = bs4.BeautifulSoup(website_request.text, "lxml")
-        books = soup.select(".product_pod")  # get all the books from the html class ".product.pod"
-
-    for book in books:  # check for 2 star rating books
-        if len(book.select(".star-rating.Five")) != 0:  # if the list is not empty, if list is empty means the book doesn't have 2 star
-            book_title = book.select("a")[1]["title"]  # check the <a> tag to find the title
-            book_price = book.select(".price_color")
-
-            Book_titles.add(book_title)
-
-            for price in book_price:
-                pass
-            with open("main.txt", "w+") as file:
-                file.write(str(Book_titles))
-                        
-            # in this case the book has 2 <a> tag one for the image/link and the scond one([1]) contains the 'title' tag in it
-            # so we search the <a> tag and grab the title from it
-"""
-            cursor.execute("SELECT * FROM books")
-            result = cursor.fetchall()
-
-            if len(result) <= 0:
-                cursor.execute("INSERT INTO books(book_name) VALUES (?)", (str(book_title),)) #have to pass in the , otherwise won't work
-                conn.commit()
-            else:
-                cursor.execute("SELECT * FROM books")
-                result = cursor.fetchall()
-
-                if book in result:
-                    print("The book already exists in the database")
-                else:
-                    cursor.execute("INSERT INTO books(book_name) VALUES (?)", (str(book_title),)) #have to pass in the , otherwise won't work
-                    conn.commit()
-"""
+        #self.cursor.execute("SELECT book_price FROM books WHERE book_name == {search_for}")
+        #data = self.cursor.fetchall()
 
 
-def fetch_data(conn):
-    cursor.execute("SELECT * FROM books")
-    result = cursor.fetchall()
+    def delete_data(self,value_to_delete):
+        self.cursor.execute("DELETE FROM books WHERE book_name == {value_to_delete}")
+        self.conn.commit()
 
-    for x in result:
-        print(x)
+    def delete_all_data(self):
+        self.cursor.execute("DELETE FROM books")
+        self.conn.commit()
+ 
 
-def delete_data(conn):
-    cursor.execute("DELETE FROM books")
-    conn.commit()
 
-inserting_data(conn)
-fetch_data(conn)
-delete_data(conn)
+start = Books()
+start.delete_all_data()
+start.create_table()
+start.insert_data()
+start.show_values()
 
-"""
+
 app=Flask(__name__)
 
-
-hmm="hi"
-
-request.main()
-num=-1
-
-
-def a(number):
-    global num
-    num += 1
-    return request.Book_titles[number]
-
-
-
-
-app.jinja_env.globals.update(hmm)
-
-
-@ app.route("/")
-def main():
-    while num < len(request.Book_titles):
-        return a(num)
-
-
-@ app.route("/main")
+@app.route("/")
 def books():
-    data=request.Book_titles
-    price=request.Book_prices
+    data=start.Book_titles
+    price= start.Book_price
     return render_template('table.html', data=data, price=price)
 
 
 app.run(debug=True)
-"""

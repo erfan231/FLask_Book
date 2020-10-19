@@ -16,3 +16,12 @@ values = cursor.fetchall()
 
 for y in values:
     print(y)
+
+
+
+def delete_data(conn):
+    cursor.execute("DELETE FROM books")
+    conn.commit()
+
+
+delete_data(conn)
