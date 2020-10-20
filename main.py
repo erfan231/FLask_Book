@@ -1,6 +1,9 @@
 from flask import Flask, render_template
 import sqlite3
 import request
+import jinja2
+env = jinja2.Environment()
+env.globals.update(zip=zip)
 
 class Books:
     def __init__(self):
@@ -69,14 +72,20 @@ start.create_table()
 start.insert_data()
 start.show_values()
 
+"""
+zipped = zip(start.Book_titles, start.Book_price)
+for x in zipped:
+    print(x[0])
+    print(x[1])
 
+"""
 app=Flask(__name__)
-
+app.jinja_env.filters['zip'] = zip
 @app.route("/")
 def books():
-    data=start.Book_titles
-    price= start.Book_price
-    return render_template('table.html', data=data, price=price)
+    books = start.Book_titles
+    price = start.Book_price
+    return render_template('table.html', data = zip(books,price))
 
 
 app.run(debug=True)

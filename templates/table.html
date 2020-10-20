@@ -23,15 +23,14 @@
     </thead>    
     <tbody>
         
-        {% for price in price %}
-        {% for book in data %}
+        {% for result in data %}        
             <tr>
-                <td></td>
-                <td>{{price}}</td>
+                <td>{{result[0]}}</td>
+                <td>{{result[1]}}</td>
                 <td>5 star</td>
             </tr>
         {% endfor %}
-        {% endfor %}
+        
             
         
 
